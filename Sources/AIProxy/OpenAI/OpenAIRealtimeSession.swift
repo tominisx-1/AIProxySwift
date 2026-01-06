@@ -160,8 +160,25 @@ nonisolated private let kWebsocketDisconnectedEarlyThreshold: TimeInterval = 3
         
         // New cases for handling transcription messages
         case "response.audio_transcript.delta":
-            if let delta = json["delta"] as? String {
-                self.continuation?.yield(.responseTranscriptDelta(delta))
+            if let eventID = json["event_id"] as? String,
+               let responseID = json["response_id"] as? String,
+               let itemID = json["item_id"] as? String,
+               let outputIndex = json["output_index"] as? Int,
+               let contentIndex = json["content_index"] as? Int,
+               let delta = json["delta"] as? String
+            {
+                let enriched = EnrichedResponseTranscriptDelta(
+                    content_index: contentIndex,
+                    delta: delta,
+                    event_id: eventID,
+                    item_id: itemID,
+                    output_index: outputIndex,
+                    response_id: responseID
+                )
+                self.continuation?.yield(.responseTranscriptDelta(enriched))
+                
+            } else {
+                fatalError()
             }
             
         case "response.audio_transcript.done":

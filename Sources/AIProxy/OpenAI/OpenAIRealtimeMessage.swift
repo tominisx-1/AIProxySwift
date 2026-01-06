@@ -15,9 +15,40 @@ nonisolated public enum OpenAIRealtimeMessage: Sendable {
     case responseFunctionCallArgumentsDone(String, String, String) // "response.function_call_arguments.done"
     
     // Add new cases for transcription
-    case responseTranscriptDelta(String) // "response.audio_transcript.delta"
+    case responseTranscriptDelta(EnrichedResponseTranscriptDelta) // "response.audio_transcript.delta"
     case responseTranscriptDone(String) // "response.audio_transcript.done"
     case inputAudioBufferTranscript(String) // "input_audio_buffer.transcript"
     case inputAudioTranscriptionDelta(String) // "conversation.item.input_audio_transcription.delta"
     case inputAudioTranscriptionCompleted(String) // "conversation.item.input_audio_transcription.completed"
 }
+
+
+
+//response.output_audio_transcript.delta
+public struct EnrichedResponseTranscriptDelta: Sendable {
+    let content_index: Int
+    let delta: String
+    let event_id: String
+    let item_id: String
+    let output_index: Int
+    let response_id: String
+    
+    public init(
+        content_index: Int,
+        delta: String,
+        event_id: String,
+        item_id: String,
+        output_index: Int,
+        response_id: String,
+    ) {
+        self.content_index = content_index
+        self.delta = delta
+        self.event_id = event_id
+        self.item_id = item_id
+        self.output_index = output_index
+        self.response_id = response_id
+    }
+
+}
+
+
