@@ -26,12 +26,12 @@ nonisolated public enum OpenAIRealtimeMessage: Sendable {
 
 //response.output_audio_transcript.delta
 public struct EnrichedResponseTranscriptDelta: Sendable {
-    let content_index: Int
-    let delta: String
-    let event_id: String
-    let item_id: String
-    let output_index: Int
-    let response_id: String
+    public let content_index: Int
+    public let delta: String
+    public let event_id: String
+    public let item_id: String
+    public let output_index: Int
+    public let response_id: String
     
     public init(
         content_index: Int,
