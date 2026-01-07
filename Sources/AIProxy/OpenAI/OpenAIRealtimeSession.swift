@@ -160,6 +160,7 @@ nonisolated private let kWebsocketDisconnectedEarlyThreshold: TimeInterval = 3
         
         // New cases for handling transcription messages
         case "response.audio_transcript.delta":
+            
             if let eventID = json["event_id"] as? String,
                let responseID = json["response_id"] as? String,
                let itemID = json["item_id"] as? String,
@@ -169,22 +170,37 @@ nonisolated private let kWebsocketDisconnectedEarlyThreshold: TimeInterval = 3
             {
                 let enriched = EnrichedResponseTranscriptDelta(
                     content_index: contentIndex,
-                    delta: delta,
+                    text: delta,
                     event_id: eventID,
                     item_id: itemID,
                     output_index: outputIndex,
-                    response_id: responseID
+                    response_id: responseID,
+                    is_done: false
                 )
                 self.continuation?.yield(.responseTranscriptDelta(enriched))
-                
-            } else {
-                fatalError()
             }
             
         case "response.audio_transcript.done":
-            if let transcript = json["transcript"] as? String {
-                self.continuation?.yield(.responseTranscriptDone(transcript))
+            
+            if let eventID = json["event_id"] as? String,
+               let responseID = json["response_id"] as? String,
+               let itemID = json["item_id"] as? String,
+               let outputIndex = json["output_index"] as? Int,
+               let contentIndex = json["content_index"] as? Int,
+               let transcript = json["transcript"] as? String
+            {
+                let enriched = EnrichedResponseTranscriptDelta(
+                    content_index: contentIndex,
+                    text: transcript,
+                    event_id: eventID,
+                    item_id: itemID,
+                    output_index: outputIndex,
+                    response_id: responseID,
+                    is_done: true
+                )
+                self.continuation?.yield(.responseTranscriptDone(enriched))
             }
+
             
         case "input_audio_buffer.transcript":
             if let transcript = json["transcript"] as? String {
@@ -192,13 +208,38 @@ nonisolated private let kWebsocketDisconnectedEarlyThreshold: TimeInterval = 3
             }
             
         case "conversation.item.input_audio_transcription.delta":
-            if let delta = json["delta"] as? String {
-                self.continuation?.yield(.inputAudioTranscriptionDelta(delta))
+            
+            if let eventID = json["event_id"] as? String,
+               let itemID = json["item_id"] as? String,
+               let contentIndex = json["content_index"] as? Int,
+               let delta = json["delta"] as? String
+            {
+                let enriched = EnrichedInputTranscriptDelta(
+                    content_index: contentIndex,
+                    text: delta,
+                    event_id: eventID,
+                    item_id: itemID,
+                    is_done: false
+                )
+                self.continuation?.yield(.inputAudioTranscriptionDelta(enriched))
             }
+
             
         case "conversation.item.input_audio_transcription.completed":
-            if let transcript = json["transcript"] as? String {
-                self.continuation?.yield(.inputAudioTranscriptionCompleted(transcript))
+            
+            if let eventID = json["event_id"] as? String,
+               let itemID = json["item_id"] as? String,
+               let contentIndex = json["content_index"] as? Int,
+               let transcript = json["transcript"] as? String
+            {
+                let enriched = EnrichedInputTranscriptDelta(
+                    content_index: contentIndex,
+                    text: transcript,
+                    event_id: eventID,
+                    item_id: itemID,
+                    is_done: true
+                )
+                self.continuation?.yield(.inputAudioTranscriptionCompleted(enriched))
             }
             
         default:
